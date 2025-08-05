@@ -18,6 +18,8 @@ Route::view('profile', 'profile')
 Route::middleware(['auth', 'admin'])->group(function () {
     // Usamos el nombre del componente Volt directamente como controlador
     Volt::route('/admin/clientes', 'admin.manage-clients')->name('admin.clients');
+
+    Volt::route('/admin/reportes', 'admin.manage-reports')->name('admin.reports');
 });
 
 require __DIR__ . '/auth.php';

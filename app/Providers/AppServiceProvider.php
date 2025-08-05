@@ -2,9 +2,13 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\ServiceProvider;
 use App\Domain\Contracts\UserRepositoryInterface;
 use App\Infrastructure\Repositories\EloquentUserRepository;
-use Illuminate\Support\ServiceProvider;
+use App\Domain\Contracts\ReportRepositoryInterface;
+use App\Infrastructure\Repositories\EloquentReportRepository;
+
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -16,6 +20,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             UserRepositoryInterface::class,
             EloquentUserRepository::class
+        );
+
+        $this->app->bind(
+            ReportRepositoryInterface::class,
+            EloquentReportRepository::class
         );
     }
 
