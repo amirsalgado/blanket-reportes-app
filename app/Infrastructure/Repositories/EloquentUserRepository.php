@@ -99,8 +99,13 @@ class EloquentUserRepository implements UserRepositoryInterface
      *
      * @return integer
      */
-    public function getActiveClientsCount(): int
+
+    public function getActiveClientsCount(?string $startDate = null, ?string $endDate = null): int
     {
-        return User::where('role', 'cliente')->count();
+        return User::where('role', 'cliente')
+            ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            })
+            ->count();
     }
 }

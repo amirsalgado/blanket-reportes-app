@@ -7,6 +7,7 @@ use App\Models\Report;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class EloquentReportRepository implements ReportRepositoryInterface
 {
@@ -54,45 +55,54 @@ class EloquentReportRepository implements ReportRepositoryInterface
             ->paginate($perPage);
     }
 
-    public function getTotalCount(): int
+    public function getTotalCount(?string $startDate = null, ?string $endDate = null): int
     {
-        return Report::count();
+        return Report::when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+            $query->whereBetween('created_at', [$startDate, $endDate]);
+        })
+            ->count();
     }
 
-    public function getMonthlyActivity(int $months = 6): array
+    public function getMonthlyActivity(?string $startDate = null, ?string $endDate = null): array
     {
+        // Si no hay fechas, se muestran los últimos 5 meses más el actual.
+        $start = $startDate ? Carbon::parse($startDate) : now()->subMonths(5)->startOfMonth();
+        $end = $endDate ? Carbon::parse($endDate) : now()->endOfMonth();
+
+        // 1. Obtenemos los datos reales de la base de datos.
         $activity = Report::select(
             DB::raw('YEAR(created_at) as year'),
             DB::raw('MONTH(created_at) as month'),
             DB::raw('COUNT(*) as count')
         )
-            ->where('created_at', '>=', now()->subMonths($months))
+            ->whereBetween('created_at', [$start, $end])
             ->groupBy('year', 'month')
             ->orderBy('year', 'asc')
             ->orderBy('month', 'asc')
-            ->get();
+            ->get()
+            ->keyBy(function ($item) {
+                // Creamos una clave 'YYYY-M' para un acceso fácil (ej: '2025-8')
+                return $item->year . '-' . $item->month;
+            });
 
-        // Formatear los datos para la gráfica
         $labels = [];
         $data = [];
 
-        // Rellenar con meses vacíos para una gráfica continua
-        for ($i = $months; $i >= 0; $i--) {
-            $date = now()->subMonths($i);
-            $labels[] = $date->format('M'); // 'Jan', 'Feb', etc.
-            $data[$date->format('Y-n')] = 0;
-        }
+        // 2. Iteramos mes por mes desde la fecha de inicio hasta la de fin.
+        $period = $start->copy();
+        while ($period->lessThanOrEqualTo($end)) {
+            $key = $period->format('Y-n');
+            $labels[] = $period->format('M Y'); // Formato de etiqueta, ej: 'Ago 2025'
 
-        foreach ($activity as $record) {
-            $key = $record->year . '-' . $record->month;
-            if (isset($data[$key])) {
-                $data[$key] = $record->count;
-            }
+            // 3. Si encontramos datos para ese mes en la consulta, los usamos. Si no, el valor es 0.
+            $data[] = $activity->get($key)->count ?? 0;
+
+            $period->addMonth();
         }
 
         return [
             'labels' => $labels,
-            'data' => array_values($data),
+            'data' => $data,
         ];
     }
 }
