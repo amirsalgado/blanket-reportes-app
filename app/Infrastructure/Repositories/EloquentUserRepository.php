@@ -93,4 +93,14 @@ class EloquentUserRepository implements UserRepositoryInterface
             ->latest() // Ordena los más recientes primero
             ->paginate($perPage);
     }
+
+    /**
+     * Obtiene la cantidad total de clientes
+     *
+     * @return integer
+     */
+    public function getActiveClientsCount(): int
+    {
+        return User::where('role', 'cliente')->count();
+    }
 }

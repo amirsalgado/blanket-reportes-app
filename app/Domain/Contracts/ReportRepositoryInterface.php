@@ -12,4 +12,6 @@ interface ReportRepositoryInterface
     public function findById(int $id): ?Report;
     public function getPaginated(string $search = '', int $perPage = 10): LengthAwarePaginator;
     public function getForUserPaginated(int $userId, string $search = '', int $perPage = 10): LengthAwarePaginator;
+    public function getTotalCount(): int;
+    public function getMonthlyActivity(int $months = 6): array;
 }

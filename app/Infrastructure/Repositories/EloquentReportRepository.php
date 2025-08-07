@@ -6,6 +6,7 @@ use App\Domain\Contracts\ReportRepositoryInterface;
 use App\Models\Report;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class EloquentReportRepository implements ReportRepositoryInterface
 {
@@ -51,5 +52,47 @@ class EloquentReportRepository implements ReportRepositoryInterface
             })
             ->latest()
             ->paginate($perPage);
+    }
+
+    public function getTotalCount(): int
+    {
+        return Report::count();
+    }
+
+    public function getMonthlyActivity(int $months = 6): array
+    {
+        $activity = Report::select(
+            DB::raw('YEAR(created_at) as year'),
+            DB::raw('MONTH(created_at) as month'),
+            DB::raw('COUNT(*) as count')
+        )
+            ->where('created_at', '>=', now()->subMonths($months))
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'asc')
+            ->orderBy('month', 'asc')
+            ->get();
+
+        // Formatear los datos para la gráfica
+        $labels = [];
+        $data = [];
+
+        // Rellenar con meses vacíos para una gráfica continua
+        for ($i = $months; $i >= 0; $i--) {
+            $date = now()->subMonths($i);
+            $labels[] = $date->format('M'); // 'Jan', 'Feb', etc.
+            $data[$date->format('Y-n')] = 0;
+        }
+
+        foreach ($activity as $record) {
+            $key = $record->year . '-' . $record->month;
+            if (isset($data[$key])) {
+                $data[$key] = $record->count;
+            }
+        }
+
+        return [
+            'labels' => $labels,
+            'data' => array_values($data),
+        ];
     }
 }
