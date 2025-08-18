@@ -115,6 +115,51 @@
             </main>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    {{-- Listener para notificaciones --}}
+    <script>
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('swal:success', (event) => {
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+
+                Toast.fire({
+                    icon: 'success',
+                    title: event.message || '¡Acción realizada con éxito!'
+                });
+            });
+
+            Livewire.on('swal:error', (event) => {
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 4000, // Un poco más de tiempo para leer el error
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+
+                Toast.fire({
+                    icon: 'error',
+                    title: event.message || '¡Ha ocurrido un error!'
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

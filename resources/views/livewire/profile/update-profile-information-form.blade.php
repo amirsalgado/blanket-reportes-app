@@ -19,7 +19,7 @@ new class extends Component
         $this->name = Auth::user()->name;
         $this->email = Auth::user()->email;
     }
-
+    
     /**
      * Update the profile information for the currently authenticated user.
      */
@@ -41,6 +41,8 @@ new class extends Component
         $user->save();
 
         $this->dispatch('profile-updated', name: $user->name);
+
+        $this->dispatch('swal:success', message: 'Perfil actualizado con éxito.');
     }
 
     /**
