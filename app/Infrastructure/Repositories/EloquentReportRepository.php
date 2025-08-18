@@ -32,18 +32,24 @@ class EloquentReportRepository implements ReportRepositoryInterface
         return Report::find($id);
     }
 
-    public function getPaginated(string $search = '', int $perPage = 10): LengthAwarePaginator
-    {
-        return Report::with('user') // Carga la relación con el cliente
-            ->when($search, function ($query, $search) {
-                $query->where('file_name', 'like', "%{$search}%")
-                    ->orWhereHas('user', function ($userQuery) use ($search) {
-                        $userQuery->where('name', 'like', "%{$search}%");
-                    });
-            })
-            ->latest()
-            ->paginate($perPage);
-    }
+    public function getPaginated(string $search = '', int $perPage = 10, ?string $startDate = null, ?string $endDate = null): LengthAwarePaginator
+{
+    return Report::with('user')
+        // Añadimos los filtros de fecha. `whereDate` se asegura de comparar solo la parte de la fecha.
+        ->when($startDate, fn($query) => $query->whereDate('reports.created_at', '>=', $startDate))
+        ->when($endDate, fn($query) => $query->whereDate('reports.created_at', '<=', $endDate))
+        ->when($search, function ($query, $search) {
+            // Se anida la búsqueda de texto para que no interfiera con los filtros de fecha.
+            $query->where(function($q) use ($search) {
+                $q->where('file_name', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', "%{$search}%");
+                  });
+            });
+        })
+        ->latest('reports.created_at') // Ordenar por fecha de creación del reporte
+        ->paginate($perPage);
+}
 
     public function getForUserPaginated(int $userId, string $search = '', int $perPage = 10): LengthAwarePaginator
     {
