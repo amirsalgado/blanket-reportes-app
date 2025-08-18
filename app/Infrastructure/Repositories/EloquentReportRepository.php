@@ -19,9 +19,7 @@ class EloquentReportRepository implements ReportRepositoryInterface
     public function delete(int $id): bool
     {
         $report = $this->findById($id);
-        if ($report) {
-            // Eliminar el archivo físico del storage antes de borrar el registro
-            Storage::disk('private')->delete($report->file_path);
+        if ($report) {           
             return $report->delete();
         }
         return false;

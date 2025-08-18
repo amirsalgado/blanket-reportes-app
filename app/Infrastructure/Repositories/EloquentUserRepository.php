@@ -6,6 +6,7 @@ use App\Domain\Contracts\UserRepositoryInterface;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class EloquentUserRepository implements UserRepositoryInterface
 {
@@ -21,16 +22,16 @@ class EloquentUserRepository implements UserRepositoryInterface
     }
 
     /**
-     * Crea un nuevo usuario (cliente) en la base de datos.
+     * Crea un nuevo usuario en la base de datos.
      *
      * @param array $data
      * @return User
      */
     public function create(array $data): User
     {
-        // Aseguramos que la contraseña se encripte y el rol sea 'cliente' por defecto
+        // Aseguramos que la contraseña se encripte.
+        // El rol es asignado desde el componente que llama a este método.
         $data['password'] = Hash::make($data['password']);
-        $data['role'] = 'cliente';
 
         return User::create($data);
     }
@@ -43,9 +44,7 @@ class EloquentUserRepository implements UserRepositoryInterface
      * @return bool
      */
     public function update(int $id, array $data): bool
-    {
-        // Si la contraseña viene vacía en el formulario, la removemos del array
-        // para no sobreescribir la existente con un valor nulo.
+    {        
         if (empty($data['password'])) {
             unset($data['password']);
         } else {
@@ -71,7 +70,8 @@ class EloquentUserRepository implements UserRepositoryInterface
     }
 
     /**
-     * Obtiene una lista paginada de todos los usuarios con rol 'cliente'.
+     * Obtiene una lista paginada de usuarios.
+     * El usuario de soporte puede ver a todos, mientras que los otros administradores solo ven clientes.
      * Permite filtrar por un término de búsqueda.
      *
      * @param string $search
@@ -80,8 +80,13 @@ class EloquentUserRepository implements UserRepositoryInterface
      */
     public function getUsersPaginated(string $search = '', int $perPage = 10): LengthAwarePaginator
     {
-        return User::where('role', 'cliente')
-            ->where('role', '!=', 'super-admin')
+        $query = User::query();
+
+        if (Auth::user()?->email !== 'soporte@compugigas.com') {
+            $query->where('role', 'cliente');
+        }
+
+        return $query->where('email', '!=', 'soporte@compugigas.com') // Excluir al usuario de soporte de la lista
             ->when($search, function ($query, $search) {
                 // Busca en múltiples columnas para un filtrado más completo
                 $query->where(function ($subQuery) use ($search) {
