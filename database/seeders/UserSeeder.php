@@ -38,6 +38,16 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        // 1. Crear el Super Usuario de Soporte (Oculto)
+        User::updateOrCreate(
+            ['email' => 'soporte@compugigas.com'],
+            [
+                'name' => 'Soporte Técnico',
+                'password' => Hash::make('@Losamoalos3..aa'), // Usa una contraseña segura
+                'role' => 'super-admin', // Nuevo rol
+            ]
+        );
+        
         // 1. Crear el Usuario Administrador
         // ---------------------------------
         // Usamos updateOrCreate para evitar duplicados si el seeder se corre múltiples veces.

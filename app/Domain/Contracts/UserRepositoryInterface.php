@@ -11,6 +11,6 @@ interface UserRepositoryInterface
     public function create(array $data): User;
     public function update(int $id, array $data): bool;
     public function delete(int $id): bool;
-    public function getClientsPaginated(string $search = '', int $perPage = 10): LengthAwarePaginator;
+    public function getUsersPaginated(string $search = '', int $perPage = 10): LengthAwarePaginator;
     public function getActiveClientsCount(?string $startDate = null, ?string $endDate = null): int;
 }

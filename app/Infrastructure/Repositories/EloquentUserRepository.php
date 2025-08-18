@@ -78,9 +78,10 @@ class EloquentUserRepository implements UserRepositoryInterface
      * @param int $perPage
      * @return LengthAwarePaginator
      */
-    public function getClientsPaginated(string $search = '', int $perPage = 10): LengthAwarePaginator
+    public function getUsersPaginated(string $search = '', int $perPage = 10): LengthAwarePaginator
     {
         return User::where('role', 'cliente')
+            ->where('role', '!=', 'super-admin')
             ->when($search, function ($query, $search) {
                 // Busca en múltiples columnas para un filtrado más completo
                 $query->where(function ($subQuery) use ($search) {
