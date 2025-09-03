@@ -122,7 +122,7 @@ new class extends Component {
                     @forelse($reports as $report)
                         <tr wire:key="{{ $report->id }}">
                             <td class="px-6 py-4 whitespace-nowrap">{{ $report->file_name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">{{ $report->user->name }}</td>
+                             <td class="px-6 py-4 whitespace-nowrap">{{ $report->user->company ?? $report->user->name }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">{{ $report->created_at->format('d/m/Y H:i') }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <button wire:click="download({{ $report->id }})"
