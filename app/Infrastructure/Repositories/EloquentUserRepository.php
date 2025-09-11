@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Collection;
 
 class EloquentUserRepository implements UserRepositoryInterface
 {
@@ -113,5 +114,12 @@ class EloquentUserRepository implements UserRepositoryInterface
                 $query->whereBetween('created_at', [$startDate, $endDate]);
             })
             ->count();
+    }
+
+    public function getClientsForSelect(): Collection
+    {
+        return User::where('role', 'cliente')
+            ->orderBy('company', 'asc') // Ordenar alfabéticamente por empresa
+            ->get(['id', 'company']); // Solo obtenemos los campos necesarios
     }
 }

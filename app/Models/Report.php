@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Domain\Enums\ServiceType; // Importar el Enum
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,9 +15,15 @@ class Report extends Model
         'user_id',
         'file_name',
         'file_path',
+        'month',    // Añadido
+        'service',  // Añadido
     ];
 
-    // Un reporte pertenece a un usuario (cliente)
+    // Castear el campo 'service' al Enum de ServiceType
+    protected $casts = [
+        'service' => ServiceType::class,
+    ];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

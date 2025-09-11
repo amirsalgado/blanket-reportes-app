@@ -75,7 +75,7 @@
             <h2 class="text-3xl font-bold mb-4">¿Necesitas Ayuda?</h2>
             <p class="text-lg text-gray-600 mb-6">Estamos aquí para asistirte.</p>
             <p class="mb-2 text-gray-800"><strong>Correo:</strong> contacto@blanketingenieria.com</p>
-            <p class="mb-2 text-gray-800"><strong>Teléfono:</strong> +57 300 123 4567</p>
+            <p class="mb-2 text-gray-800"><strong>Teléfono:</strong> +573106169316</p>
             <p class="text-gray-800"><strong>Dirección:</strong> Sincelejo, Sucre, Colombia</p>
         </div>
     </section>

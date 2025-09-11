@@ -13,4 +13,5 @@ interface UserRepositoryInterface
     public function delete(int $id): bool;
     public function getUsersPaginated(string $search = '', int $perPage = 10): LengthAwarePaginator;
     public function getActiveClientsCount(?string $startDate = null, ?string $endDate = null): int;
+    public function getClientsForSelect(): \Illuminate\Support\Collection;
 }
