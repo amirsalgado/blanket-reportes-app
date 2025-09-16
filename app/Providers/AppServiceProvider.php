@@ -7,6 +7,9 @@ use App\Domain\Contracts\UserRepositoryInterface;
 use App\Infrastructure\Repositories\EloquentUserRepository;
 use App\Domain\Contracts\ReportRepositoryInterface;
 use App\Infrastructure\Repositories\EloquentReportRepository;
+use App\Models\ProjectFile;
+use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 
 
 
@@ -33,6 +36,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Gate::define('view', function (User $user, ProjectFile $projectFile) {
+            return $user->id === $projectFile->user_id;
+        });
     }
 }
