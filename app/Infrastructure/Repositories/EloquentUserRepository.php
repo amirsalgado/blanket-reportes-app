@@ -122,4 +122,18 @@ class EloquentUserRepository implements UserRepositoryInterface
             ->orderBy('company', 'asc') // Ordenar alfabéticamente por empresa
             ->get(['id', 'company']); // Solo obtenemos los campos necesarios
     }
+
+    public function getClientsPaginated(string $search = '', int $perPage = 15): LengthAwarePaginator
+    {
+        return User::where('role', 'cliente')
+            ->when($search, function ($query, $search) {
+                $query->where(function ($subQuery) use ($search) {
+                    $subQuery->where('name', 'like', "%{$search}%")
+                        ->orWhere('company', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('company')
+            ->paginate($perPage);
+    }
 }

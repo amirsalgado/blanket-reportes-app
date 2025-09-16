@@ -52,6 +52,15 @@
                             </svg>
                             <span>Reportes</span>
                         </a>
+                        <a href="{{ route('admin.projects.index') }}"
+                            class="flex items-center py-2 px-4 rounded-md transition duration-200 {{ request()->routeIs('admin.projects.*') ? 'bg-blanket-yellow text-blanket-blue' : 'hover:bg-white/10' }}">
+                            <svg class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z">
+                                </path>
+                            </svg>
+                            <span>Proyectos</span>
+                        </a>
                         <a href="{{ route('admin.clients') }}"
                             class="flex items-center mt-2 py-2 px-4 rounded-md transition duration-200 {{ request()->routeIs('admin.clients') ? 'bg-blanket-yellow text-blanket-blue' : 'hover:bg-blanket-blue-light' }}">
                             {{-- Icono de Clientes --}}
