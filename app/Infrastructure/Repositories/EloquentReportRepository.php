@@ -19,6 +19,17 @@ class EloquentReportRepository implements ReportRepositoryInterface
     {
         return Report::with('user')
             ->when($search, function ($query, $search) {
+                $query->where(function ($subQuery) use ($search) {
+                    // Busca en el nombre del archivo
+                    $subQuery->where('file_name', 'like', "%{$search}%")
+                        // O busca en las relaciones del usuario (nombre o empresa)
+                        ->orWhereHas('user', function ($userQuery) use ($search) {
+                            $userQuery->where('name', 'like', "%{$search}%")
+                                      ->orWhere('company', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->when($search, function ($query, $search) {
                 $query->where('file_name', 'like', "%{$search}%")
                     ->orWhereHas('user', function ($subQuery) use ($search) {
                         $subQuery->where('name', 'like', "%{$search}%")

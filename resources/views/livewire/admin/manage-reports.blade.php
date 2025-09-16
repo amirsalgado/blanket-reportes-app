@@ -111,7 +111,18 @@ new class extends Component
 <div>
     {{-- (Contenido del componente: Búsqueda, Botón "Subir", etc. - sin cambios) --}}
     <div class="p-4 sm:p-6 lg:p-8 bg-white rounded-lg shadow">
-        {{-- ... --}}
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6">
+            <h1 class="text-2xl font-semibold text-gray-900">Gestión de Reportes</h1>
+            <x-primary-button wire:click="$set('showModal', true)">Subir Nuevo Reporte</x-primary-button>
+        </div>
+        <div class="mb-4">
+            <input 
+                wire:model.live.debounce.300ms="search" 
+                type="text" 
+                placeholder="Buscar por nombre de archivo o cliente..." 
+                class="w-full border-gray-300 rounded-md shadow-sm"
+            >
+        </div>
 
         <!-- Tabla de Reportes -->
         <div class="shadow overflow-x-auto border-b border-gray-200 sm:rounded-lg">
