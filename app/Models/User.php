@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Domain\Enums\ClientType; // Importar el Enum
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -34,5 +35,15 @@ class User extends Authenticatable
             'password' => 'hashed',
             'client_type' => ClientType::class, // Castear al Enum
         ];
+    }
+
+    public function rootFolders(): HasMany
+    {
+        return $this->hasMany(Folder::class)->whereNull('parent_id');
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(Document::class);
     }
 }
