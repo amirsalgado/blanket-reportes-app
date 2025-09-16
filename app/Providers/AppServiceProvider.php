@@ -38,12 +38,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Gate para archivos de proyecto
-        Gate::define('view', function (User $user, ProjectFile $projectFile) {
+        Gate::define('view-project-file', function (User $user, ProjectFile $projectFile) {
             return $user->id === $projectFile->user_id;
         });
 
         // Gate para reportes
-        Gate::define('view', function (User $user, Report $report) {
+        Gate::define('view-report', function (User $user, Report $report) {
             return $user->id === $report->user_id;
         });
     }

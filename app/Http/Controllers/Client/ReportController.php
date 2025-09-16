@@ -11,8 +11,8 @@ class ReportController extends Controller
 {
     public function preview(Report $report)
     {
-        // Gate::authorize('view', $report) se asegura de que el cliente actual sea el dueño del reporte.
-        Gate::authorize('view', $report);
+        
+        Gate::authorize('view-report', $report);
 
         if (!Storage::disk('private')->exists($report->file_path)) {
             abort(404, 'Archivo no encontrado.');
