@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\ProjectFileController as AdminProjectFileController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Client\ProjectFileController as ClientProjectFileController;
+use App\Http\Controllers\Client\ReportController as ClientReportController;
 use Livewire\Volt\Volt;
 
 
@@ -23,6 +24,8 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('/proyectos', 'client.project-viewer')->name('client.projects.index');
     // Descarga de archivos de proyecto para el cliente
     Route::get('/proyectos/archivos/{projectFile}/descargar', [ClientProjectFileController::class, 'download'])->name('client.projects.files.download');
+    Route::get('/reportes/{report}/preview', [ClientReportController::class, 'preview'])->name('client.reports.preview');
+    Route::get('/reportes/{report}/descargar', [ClientReportController::class, 'download'])->name('client.reports.download');
 });
 
 // --- NUESTRAS RUTAS DE ADMINISTRADOR ---

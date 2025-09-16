@@ -13,7 +13,15 @@ class ProjectFileController extends Controller
     {
         // Usamos una Gate para asegurar que el cliente solo puede descargar sus propios archivos
         Gate::authorize('view', $projectFile);
-
         return Storage::disk('private')->download($projectFile->file_path, $projectFile->file_name);
+    }
+
+    public function preview(ProjectFile $projectFile)
+    {
+        Gate::authorize('view', $projectFile);
+        if (!Storage::disk('private')->exists($projectFile->file_path)) {
+            abort(404, 'Archivo no encontrado.');
+        }
+        return Storage::disk('private')->response($projectFile->file_path);
     }
 }

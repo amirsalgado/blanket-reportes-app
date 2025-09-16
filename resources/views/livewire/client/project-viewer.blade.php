@@ -14,6 +14,10 @@ new class extends Component
     public ?Folder $currentFolder = null;
     public array $breadcrumbs = [];
 
+    // --- NUEVAS PROPIEDADES PARA LA VISTA PREVIA ---
+    public bool $showPreviewModal = false;
+    public ?string $previewUrl = null;
+
     public function mount(): void
     {
         $this->client = Auth::user();
@@ -58,6 +62,18 @@ new class extends Component
     {
         $this->currentFolder = $folderId ? Folder::findOrFail($folderId) : null;
         $this->generateBreadcrumbs();
+    }
+
+    public function showPreview(int $fileId): void
+    {
+        $this->previewUrl = route('client.projects.files.preview', $fileId);
+        $this->showPreviewModal = true;
+    }
+
+    public function closePreview(): void
+    {
+        $this->showPreviewModal = false;
+        $this->previewUrl = null;
     }
 }; ?>
 
@@ -109,6 +125,7 @@ new class extends Component
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Archivo</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $projectFile->created_at->format('d/m/Y') }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <button wire:click="showPreview({{ $projectFile->id }})" class="text-indigo-600 hover:text-indigo-900">Ver</button>
                                 <a href="{{ route('client.projects.files.download', $projectFile) }}" class="text-green-600 hover:text-green-900">Descargar</a>
                             </td>
                         </tr>
@@ -117,4 +134,21 @@ new class extends Component
             </tbody>
         </table>
     </div>
+
+    @if ($showPreviewModal)
+        <div class="fixed z-20 inset-0 overflow-y-auto" x-data @keydown.escape.window="$wire.closePreview()">
+            <div class="flex items-center justify-center min-h-screen">
+                <div wire:click="closePreview()" class="fixed inset-0 bg-gray-500 bg-opacity-75"></div>
+                <div class="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full sm:max-w-4xl" style="height: 90vh;">
+                    <div class="flex justify-between items-center p-4 border-b">
+                        <h3 class="text-lg font-medium text-gray-900">Vista Previa del Reporte</h3>
+                        <button wire:click="closePreview()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+                    </div>
+                    <div class="p-4 h-full">
+                        <iframe src="{{ $previewUrl }}" frameborder="0" class="w-full" style="height: calc(100% - 4rem);"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
