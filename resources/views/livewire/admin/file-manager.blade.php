@@ -39,12 +39,16 @@ new class extends Component
 
     public string $newFolderName = '';
     
-    // Propiedades para acciones
+    // Properties for actions
     public $renamingType = null;
     public $renamingId = null;
     public string $renamingName = '';
     public array $selectedItems = [];
     public bool $selectAll = false;
+
+    // Properties for preview
+    public bool $showPreviewModal = false;
+    public ?string $previewUrl = null;
 
     public function mount(User $client): void
     {
@@ -76,8 +80,6 @@ new class extends Component
         return $query->get();
     }
     
-    // --- NUEVO LIFECYCLE HOOK ---
-    // Este método se ejecuta automáticamente cuando la subida temporal de archivos finaliza.
     public function updatedFiles(): void
     {
         $this->saveFiles();
@@ -92,6 +94,12 @@ new class extends Component
         } else {
             $this->selectedItems = [];
         }
+    }
+
+    protected function refreshView(): void
+    {
+        unset($this->folders);
+        unset($this->projectFiles);
     }
 
     public function openFolder(int $folderId): void
@@ -116,12 +124,6 @@ new class extends Component
         $this->currentFolder = $folderId ? Folder::findOrFail($folderId) : null;
         $this->generateBreadcrumbs();
         $this->reset('selectAll', 'selectedItems');
-    }
-
-    protected function refreshView(): void
-    {
-        unset($this->folders);
-        unset($this->projectFiles);
     }
 
     public function createFolder(): void
@@ -223,6 +225,18 @@ new class extends Component
         $this->refreshView();
         $this->dispatch('swal:success', message: 'Elementos eliminados.');
     }
+    
+    public function showPreview(int $fileId): void
+    {
+        $this->previewUrl = route('admin.projects.files.preview', $fileId);
+        $this->showPreviewModal = true;
+    }
+
+    public function closePreview(): void
+    {
+        $this->showPreviewModal = false;
+        $this->previewUrl = null;
+    }
 }; ?>
 
 <div 
@@ -259,7 +273,7 @@ new class extends Component
         
         <!-- Breadcrumbs -->
         <nav class="mb-4 text-sm text-gray-600 flex items-center space-x-2">
-            <a wire:click.prevent="goToFolder(null)" href="#" class="hover:underline">Raíz de {{ $client->company ??$client->name }}</a>
+            <a wire:click.prevent="goToFolder(null)" href="#" class="hover:underline">Raíz de {{ $client->company ?? $client->name }}</a>
             @foreach($breadcrumbs as $breadcrumb)
                 <span>/</span>
                 <a wire:click.prevent="goToFolder({{ $breadcrumb->id }})" href="#" class="hover:underline">{{ $breadcrumb->name }}</a>
@@ -365,9 +379,30 @@ new class extends Component
     <!-- Menú Contextual -->
     <div x-show="contextMenu.open" x-transition :style="`top: ${contextMenu.y}px; left: ${contextMenu.x}px;`" class="fixed bg-white rounded-md shadow-lg border w-48 py-1 z-50">
         <template x-if="contextMenu.type === 'project_file'">
-            <div><a href="#" @click.prevent="$wire.downloadFile(contextMenu.id)" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Descargar</a></div>
+            <div>
+                <a href="#" @click.prevent="$wire.showPreview(contextMenu.id); closeContextMenu();" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ver</a>
+                <a href="#" @click.prevent="$wire.downloadFile(contextMenu.id)" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Descargar</a>
+            </div>
         </template>
         <a href="#" @click.prevent="$wire.startRenaming(contextMenu.type, contextMenu.id, contextMenu.name); closeContextMenu();" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Renombrar</a>
         <a href="#" @click.prevent="if (confirm('¿Estás seguro?')) { $wire.delete(contextMenu.type, contextMenu.id); } closeContextMenu();" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Eliminar</a>
     </div>
+
+    <!-- Modal para Vista Previa -->
+    @if ($showPreviewModal)
+        <div class="fixed z-20 inset-0 overflow-y-auto" x-data @keydown.escape.window="$wire.closePreview()">
+            <div class="flex items-center justify-center min-h-screen">
+                <div wire:click="closePreview()" class="fixed inset-0 bg-gray-500 bg-opacity-75"></div>
+                <div class="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full sm:max-w-4xl" style="height: 90vh;">
+                    <div class="flex justify-between items-center p-4 border-b">
+                        <h3 class="text-lg font-medium text-gray-900">Vista Previa del Archivo</h3>
+                        <button wire:click="closePreview()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+                    </div>
+                    <div class="p-4 h-full">
+                        <iframe src="{{ $previewUrl }}" frameborder="0" class="w-full" style="height: calc(100% - 4rem);"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

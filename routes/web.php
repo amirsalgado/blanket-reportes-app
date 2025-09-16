@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\ProjectFileController;
 use App\Http\Controllers\Admin\ReportController;
 use Livewire\Volt\Volt;
 
@@ -27,6 +28,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Volt::route('/admin/proyectos/{client}', 'admin.file-manager')->name('admin.projects.show');
     // Ruta para el previsualizador de reportes
     Route::get('/admin/reportes/{report}/preview', [ReportController::class, 'preview'])->name('admin.reports.preview');
+    // Ruta para el previsualizador de documentos en proyectos
+    Route::get('/admin/proyectos/archivos/{projectFile}/preview', [ProjectFileController::class, 'preview'])->name('admin.projects.files.preview');
 
 });
 
